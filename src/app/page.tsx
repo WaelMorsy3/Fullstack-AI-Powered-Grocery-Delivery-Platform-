@@ -1,3 +1,4 @@
+import LoginRedirectHandler from "@/components/auth/LoginRedirectHandler";
 import AboutSection from "@/components/home/AboutSection";
 import Banner from "@/components/home/Banner";
 import CategorySection from "@/components/home/CategorySection";
@@ -11,7 +12,8 @@ export default function Home() {
         <Banner />
         <CategorySection />
         <NewArrivals />
-        <AboutSection/>
+        <AboutSection />
+        <LoginRedirectHandler />.
       </div>
     </FrontendLayout>
   );

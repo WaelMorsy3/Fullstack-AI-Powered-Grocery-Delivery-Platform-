@@ -1,23 +1,57 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { FiLock, FiMail } from "react-icons/fi";
 import { useAuthModal } from "@/store/authModalStore";
 import Modal from "./Modal";
+import toast from "react-hot-toast";
+import router from "next/dist/shared/lib/router/router";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export default function LoginModal() {
+  const router = useRouter();
   const { isLoginOpen, closeLogin, openRegister } = useAuthModal();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log({
-      email,
-      password,
-    });
+    if (!email.trim() || !password.trim()) {
+      return toast.error("Please fill in all fields");
+    }
+    if (password.length < 6) {
+      return toast.error("Password must be at least 6 characters long");
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await authClient.signIn.email({
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      //if (error)
+      if (error) {
+        throw new Error(error.message || "An error occurred during login");
+      }
+      // Login successful, you can show a success message or redirect the user
+      toast.success("Login successful! Redirecting...");
+
+      setEmail("");
+      setPassword("");
+      closeLogin();
+
+      router.refresh(); // Refresh the page to reflect the new user state
+    } catch (error) {
+      console.error("Error during login:", error);
+      toast.error("An error occurred during login. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRegister = () => {
@@ -34,9 +68,7 @@ export default function LoginModal() {
             <FiLock size={22} />
           </div>
 
-          <h2 className="text-2xl font-semibold text-text">
-            Welcome Back
-          </h2>
+          <h2 className="text-2xl font-semibold text-text">Welcome Back</h2>
 
           <p className="mt-2 text-sm text-muted">
             Login to continue shopping with GroceryCart
@@ -112,7 +144,7 @@ export default function LoginModal() {
             type="submit"
             className="w-full cursor-pointer rounded-lg bg-primary py-3 font-medium text-white transition hover:bg-primary-hover"
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
 

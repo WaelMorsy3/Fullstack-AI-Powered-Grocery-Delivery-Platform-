@@ -11,25 +11,26 @@ import CartSidebar from "./CartSidebar";
 import { useAuthModal } from "@/store/authModalStore";
 import { LuSparkles } from "react-icons/lu";
 import GroceryAssistant from "./GroceryAssistant";
-
+import { authClient } from "@/lib/auth-client";
 
 export default function Navbar() {
+  const { data: session } = authClient.useSession();
   const [isAIOpen, setIsAIOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-   const { openLogin } = useAuthModal();
+  const { openLogin } = useAuthModal();
 
   return (
     <>
-    <button
-  type="button"
-  onClick={() => setIsAIOpen(true)}
-  className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-white shadow-lg transition hover:bg-primary-hover"
-  aria-label="Open AI grocery assistant"
->
-  <LuSparkles size={18} />
-  <span>Ask AI</span>
-</button>
+      <button
+        type="button"
+        onClick={() => setIsAIOpen(true)}
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-white shadow-lg transition hover:bg-primary-hover"
+        aria-label="Open AI grocery assistant"
+      >
+        <LuSparkles size={18} />
+        <span>Ask AI</span>
+      </button>
       <nav className="relative z-40 flex items-center justify-between border-b border-border bg-white px-6 py-4 transition-all md:px-16 lg:px-24 xl:px-32">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
@@ -44,24 +45,15 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden items-center gap-8 sm:flex">
-          <Link
-            href="/"
-            className="transition hover:text-primary"
-          >
+          <Link href="/" className="transition hover:text-primary">
             Home
           </Link>
 
-          <Link
-            href="/products"
-            className="transition hover:text-primary"
-          >
+          <Link href="/products" className="transition hover:text-primary">
             Products
           </Link>
 
-          <Link
-            href="/contact"
-            className="transition hover:text-primary"
-          >
+          <Link href="/contact" className="transition hover:text-primary">
             Contact
           </Link>
 
@@ -73,10 +65,7 @@ export default function Navbar() {
               className="w-full bg-transparent py-1.5 text-sm outline-none placeholder:text-muted"
             />
 
-            <FaSearch
-              className="text-muted"
-              size={14}
-            />
+            <FaSearch className="text-muted" size={14} />
           </div>
 
           {/* Cart */}
@@ -98,12 +87,16 @@ export default function Navbar() {
 
           {/* Login + Avatar */}
           <div className="flex items-center gap-2">
-            <button onClick={openLogin} className="cursor-pointer rounded-full bg-primary px-6 py-2 text-sm text-white transition hover:bg-primary-hover">
-              Login
-            </button>
-
-            <Avatar />
-            
+            {session ? (
+              <Avatar />
+            ) : (
+              <button
+                onClick={openLogin}
+                className="cursor-pointer rounded-full bg-primary px-6 py-2 text-sm text-white transition hover:bg-primary-hover"
+              >
+                Login
+              </button>
+            )}
           </div>
         </div>
 
@@ -120,7 +113,6 @@ export default function Navbar() {
             <span className="ml-1 h-0.5 w-4.5 rounded-full bg-muted" />
           </span>
         </button>
-     
 
         {/* Mobile Menu */}
         <div
@@ -128,24 +120,15 @@ export default function Navbar() {
             open ? "flex" : "hidden"
           } absolute left-0 top-full z-50 w-full flex-col items-start gap-4 border-b border-border bg-white px-5 py-5 text-sm shadow-md sm:hidden`}
         >
-          <Link
-            href="/"
-            className="transition hover:text-primary"
-          >
+          <Link href="/" className="transition hover:text-primary">
             Home
           </Link>
 
-          <Link
-            href="/products"
-            className="transition hover:text-primary"
-          >
+          <Link href="/products" className="transition hover:text-primary">
             Products
           </Link>
 
-          <Link
-            href="/contact"
-            className="transition hover:text-primary"
-          >
+          <Link href="/contact" className="transition hover:text-primary">
             Contact
           </Link>
 
@@ -157,10 +140,7 @@ export default function Navbar() {
               className="w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted"
             />
 
-            <FaSearch
-              className="text-muted"
-              size={14}
-            />
+            <FaSearch className="text-muted" size={14} />
           </div>
 
           {/* Mobile Cart */}
@@ -185,26 +165,24 @@ export default function Navbar() {
 
           {/* Login + Avatar */}
           <div className="flex items-center gap-3">
-            <button onClick={openLogin} className="cursor-pointer rounded-full bg-primary px-6 py-2 text-sm text-white transition hover:bg-primary-hover">
-              Login
-            </button>
-
-            <Avatar mobile />
+            {session ? (
+              <Avatar mobile />
+            ) : (
+              <button
+                onClick={openLogin}
+                className="cursor-pointer rounded-full bg-primary px-6 py-2 text-sm text-white transition hover:bg-primary-hover"
+              >
+                Login
+              </button>
+            )}
           </div>
         </div>
-        
       </nav>
 
       {/* Cart Sidebar */}
-      <CartSidebar
-        open={cartOpen}
-        onClose={() => setCartOpen(false)}
-      />
+      <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />
 
-      <GroceryAssistant
-  isOpen={isAIOpen}
-  onClose={() => setIsAIOpen(false)}
-/>
+      <GroceryAssistant isOpen={isAIOpen} onClose={() => setIsAIOpen(false)} />
     </>
   );
 }

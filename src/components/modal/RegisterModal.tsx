@@ -4,25 +4,61 @@ import { useState } from "react";
 import { FiLock, FiMail, FiUser } from "react-icons/fi";
 import { useAuthModal } from "@/store/authModalStore";
 import Modal from "./Modal";
+import toast from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/dist/client/components/navigation";
 
 export default function RegisterModal() {
+  const router = useRouter();
   const { isRegisterOpen, closeRegister, openLogin } = useAuthModal();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
- 
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e:React.SubmitEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
-    
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      return toast.error("Please fill in all fields");
+    }
 
-    console.log({
-      name,
-      email,
-      password,
-    });
+    if (password.length < 6) {
+      return toast.error("Password must be at least 6 characters long");
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await authClient.signUp.email({
+        name: name.trim(),
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      //if (error)
+      if (error) {
+        throw new Error(
+          error.message || "An error occurred during registration",
+        );
+      }
+      // Registration successful, you can show a success message or redirect the user
+      toast.success(
+        "Registration successful! Please check your email to verify your account.",
+      );
+      setName("");
+      setEmail("");
+      setPassword("");
+      closeRegister();
+
+      router.refresh(); // Refresh the page to reflect the new user state
+    } catch (error) {
+      console.error("Error during registration:", error);
+      toast.error("An error occurred during registration. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogin = () => {
@@ -70,7 +106,6 @@ export default function RegisterModal() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your full name"
-                required
                 className="w-full rounded-lg border border-border bg-white py-3 pl-10 pr-4 text-sm text-text outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -97,7 +132,6 @@ export default function RegisterModal() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                required
                 className="w-full rounded-lg border border-border bg-white py-3 pl-10 pr-4 text-sm text-text outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -124,21 +158,18 @@ export default function RegisterModal() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Create a password"
-                required
                 minLength={6}
                 className="w-full rounded-lg border border-border bg-white py-3 pl-10 pr-4 text-sm text-text outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>
 
-          
-
           {/* Register button */}
           <button
             type="submit"
             className="w-full cursor-pointer rounded-lg bg-primary py-3 font-medium text-white transition hover:bg-primary-hover"
           >
-            Create Account
+            {isLoading ? "Registering..." : "Register"}
           </button>
         </form>
 
